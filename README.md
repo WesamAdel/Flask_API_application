@@ -1,6 +1,7 @@
 This is a htoel review dataset where each row represents a review for a hotel, hotel branch to be more specific. We use hotel name as id
 for query simplicity instead of using hotel address/ location.
 
+To run: run mani.py
 
 Hotel Review Tone Analyzer:
 	- api: tone. accepts hotel name as input and returns score for each tone.
