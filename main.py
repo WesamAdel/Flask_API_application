@@ -19,6 +19,9 @@ os.chdir(dname)
 
 
 def read_preprocess_data(path):
+    '''
+    read data and fill missing values
+    '''
     df = pd.read_csv(path)
     df = df.loc[df['categories'] == 'Hotels']
     df.drop(columns=['reviews.doRecommend', 'reviews.id'])
@@ -34,6 +37,7 @@ def read_preprocess_data(path):
 data_path = r'data\7282_1.csv'
 df = read_preprocess_data(data_path)
     
+# create authenticator for IBM watson
 authenticator = IAMAuthenticator('rmfIql5Of4jHxHG3mCOpRBZ9dKGI7KS5cahwQifC2rcB')
 tone_analyzer = ToneAnalyzerV3(
    version='2017-09-21',
@@ -43,20 +47,25 @@ tone_analyzer = ToneAnalyzerV3(
 tone_analyzer.set_service_url('https://api.eu-gb.tone-analyzer.watson.cloud.ibm.com/instances/3365d25b-affc-47c2-bed6-b6e8a1c3687c')
 
 
+
 app = Flask(__name__)
+
 
 # create elasticsearch object & index
 es, index_name = create_es()
 
+# api to get tone of hotel given hotel name
 @app.route('/tone/<string:hotel_name>')
 def tone(hotel_name):
     return get_hotel_tones(hotel_name, df, tone_analyzer)
 
+# api to index all hotels
 @app.route('/index_hotels')
 def index_hotels():
     index_hotels_es(df, es, index_name, tone_analyzer)
     return 'indexing done'
 
+# api to get a hotel document from elastic search index, given hotel name
 @app.route('/get_hotel/<string:hotel_name>')
 def get_hotel(hotel_name):
     return get_hotel_es(hotel_name, es, index_name)
